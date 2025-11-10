@@ -64,15 +64,24 @@ struct ContentView: View {
         if nextButtonHidden {
           HStack{
             TextField("", text: $letter)
+              .keyboardType(.asciiCapable)
+              .submitLabel(.done)
+              .textInputAutocapitalization(.characters)
+              .autocorrectionDisabled()
               .textFieldStyle(.roundedBorder)
               .frame(width: 37)
               .overlay(RoundedRectangle(cornerRadius: 5).stroke(.black))
+              .onChange(of: letter) {
+                letter = letter.trimmingCharacters(in: .letters.inverted)
+                guard let lastChar = letter.last else {
+                  return
+                }
+                letter = String(lastChar).uppercased()
+              }
             
             Button("Guess!") {
               //TODO: Check the letter in the word
-              withAnimation {
-                nextButtonHidden.toggle()
-              }
+              
             }
             .fontWeight(.medium)
             .buttonStyle(.bordered)
@@ -83,9 +92,7 @@ struct ContentView: View {
         } else {
           Button("New Word?") {
             //TODO: New game with a new word
-            withAnimation {
-              nextButtonHidden.toggle()
-            }
+            
           }
           .fontWeight(.medium)
           .buttonStyle(.borderedProminent)
