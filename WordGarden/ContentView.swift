@@ -15,6 +15,8 @@ struct ContentView: View {
   @State private var imageName = "flower8"
   @State private var nextButtonHidden = true
   
+  @FocusState private var focusedKeyboard: Bool
+  
   private var toGuess: Int {
     words.count - guessedWords - missedWords
   }
@@ -78,10 +80,11 @@ struct ContentView: View {
                 }
                 letter = String(lastChar).uppercased()
               }
+              .focused($focusedKeyboard)
             
             Button("Guess!") {
               //TODO: Check the letter in the word
-              
+              focusedKeyboard = false
             }
             .fontWeight(.medium)
             .buttonStyle(.bordered)
