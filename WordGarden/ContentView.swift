@@ -11,7 +11,7 @@ struct ContentView: View {
   @State private var guessedWords = 0
   @State private var missedWords = 0
   @State private var letter = ""
-  @State private var current = 0
+  @State private var wordToGuess = 0
   @State private var imageName = "flower8"
   @State private var nextButtonHidden = true
   
@@ -20,11 +20,12 @@ struct ContentView: View {
   private var toGuess: Int {
     words.count - guessedWords - missedWords
   }
-  private var displayedWord: String {
+  private var revealedWord: String {
     var gameWord = ""
-    for _ in words[current] {
+    for _ in words[wordToGuess] {
       gameWord += "_ "
     }
+    gameWord.removeLast()
     return gameWord
   }
   
@@ -58,7 +59,7 @@ struct ContentView: View {
           .fontWeight(.medium)
           .multilineTextAlignment(.center)
         
-        Text(displayedWord)
+        Text(revealedWord)
           .font(.title3)
           .fontWeight(.medium)
           .padding([.top, .horizontal])
