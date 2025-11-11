@@ -83,6 +83,9 @@ struct ContentView: View {
                 letter = String(lastChar).uppercased()
               }
               .focused($focusedKeyboard)
+              .onSubmit {
+                pressGuess()
+              }
             
             Button("Guess!") {
               //TODO: Check the letter in the word
@@ -92,6 +95,7 @@ struct ContentView: View {
             .buttonStyle(.bordered)
             .tint(.appColor1.opacity(0.9))
             .foregroundStyle(.orange)
+            .disabled(letter.isEmpty)
           }
           .padding(.bottom)
         } else {
