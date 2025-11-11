@@ -84,6 +84,9 @@ struct ContentView: View {
               }
               .focused($focusedKeyboard)
               .onSubmit {
+                guard !letter.isEmpty else {
+                  return
+                }
                 pressGuess()
               }
             
