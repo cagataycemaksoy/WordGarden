@@ -17,7 +17,14 @@ struct ContentView: View {
   @State private var letter = ""
   @State private var wordToGuess = 0
   @State private var lettersGuessed = ""
-  @State private var revealedWord = ""
+  private var revealedWord: String {
+    var var2 = ""
+    for l in words[wordToGuess] {
+      var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
+    }
+    var2.removeLast()
+    return var2
+  }
   
   @State private var imageName = "flower8"
   @State private var nextButtonHidden = true
@@ -108,25 +115,13 @@ struct ContentView: View {
       }
       .ignoresSafeArea(edges: .bottom)
     }
-    .onAppear {
-      for _ in words[wordToGuess] {
-        revealedWord += "_ "
-      }
-      revealedWord.removeLast()
-    }
   }
   
   func pressGuess() {
-    var var2 = ""
     if !lettersGuessed.contains(letter) {
-      lettersGuessed += letter
-    }
-    for l in words[wordToGuess] {
-      var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
-    }
-    var2.removeLast()
-    withAnimation {
-      revealedWord = var2
+      withAnimation {
+        lettersGuessed += letter
+      }
     }
     letter = ""
     focusedKeyboard = false
