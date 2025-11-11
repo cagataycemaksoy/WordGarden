@@ -10,24 +10,18 @@ import SwiftUI
 struct ContentView: View {
   @State private var guessedWords = 0
   @State private var missedWords = 0
-  @State private var letter = ""
-  @State private var wordToGuess = 0
-  @State private var imageName = "flower8"
-  @State private var nextButtonHidden = true
-  
-  @FocusState private var focusedKeyboard: Bool
-  
   private var toGuess: Int {
     words.count - guessedWords - missedWords
   }
-  private var revealedWord: String {
-    var gameWord = ""
-    for _ in words[wordToGuess] {
-      gameWord += "_ "
-    }
-    gameWord.removeLast()
-    return gameWord
-  }
+  
+  @State private var letter = ""
+  @State private var wordToGuess = 0
+  @State private var lettersGuessed = ""
+  @State private var revealedWord = ""
+  
+  @State private var imageName = "flower8"
+  @State private var nextButtonHidden = true
+  @FocusState private var focusedKeyboard: Bool
   
   private let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE"]
   
@@ -85,6 +79,18 @@ struct ContentView: View {
             
             Button("Guess!") {
               //TODO: Check the letter in the word
+              var var2 = ""
+              if !lettersGuessed.contains(letter) {
+                lettersGuessed += letter
+              }
+              for l in words[wordToGuess] {
+                var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
+              }
+              var2.removeLast()
+              withAnimation {
+                revealedWord = var2
+              }
+              letter = ""
               focusedKeyboard = false
             }
             .fontWeight(.medium)
@@ -113,6 +119,12 @@ struct ContentView: View {
         
       }
       .ignoresSafeArea(edges: .bottom)
+    }
+    .onAppear {
+      for _ in words[wordToGuess] {
+        revealedWord += "_ "
+      }
+      revealedWord.removeLast()
     }
   }
 }
