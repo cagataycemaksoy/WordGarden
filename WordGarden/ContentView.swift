@@ -79,19 +79,7 @@ struct ContentView: View {
             
             Button("Guess!") {
               //TODO: Check the letter in the word
-              var var2 = ""
-              if !lettersGuessed.contains(letter) {
-                lettersGuessed += letter
-              }
-              for l in words[wordToGuess] {
-                var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
-              }
-              var2.removeLast()
-              withAnimation {
-                revealedWord = var2
-              }
-              letter = ""
-              focusedKeyboard = false
+              pressGuess()
             }
             .fontWeight(.medium)
             .buttonStyle(.bordered)
@@ -126,6 +114,22 @@ struct ContentView: View {
       }
       revealedWord.removeLast()
     }
+  }
+  
+  func pressGuess() {
+    var var2 = ""
+    if !lettersGuessed.contains(letter) {
+      lettersGuessed += letter
+    }
+    for l in words[wordToGuess] {
+      var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
+    }
+    var2.removeLast()
+    withAnimation {
+      revealedWord = var2
+    }
+    letter = ""
+    focusedKeyboard = false
   }
 }
 
