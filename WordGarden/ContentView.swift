@@ -10,14 +10,14 @@ import SwiftUI
 struct ContentView: View {
   private static let startTitle = "How Many Guesses to Uncover the Hidden Word?"
   private static let maxGuesses = 8
+  private static let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE", "BOOK", "HOUSE", "TIME", "CAR", "JOB", "VOCATION", "AVENUE"]
   private let noGuessTitle = "So Sorry, You're All Out Of Guesses."
-  private let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE"]
   
   @State private var availableGuesses = maxGuesses
   @State private var guessedWords = 0
   @State private var missedWords = 0
   private var toGuess: Int {
-    words.count - guessedWords - missedWords
+    Self.words.count - guessedWords - missedWords
   }
   
   @State private var letter = ""
@@ -25,12 +25,12 @@ struct ContentView: View {
   @State private var imageName = "flower8"
   @State private var gameTitle = startTitle
   @State private var correctGuesses = 0
-  @State private var guessWordIndex = 0
+  @State private var guessWordIndex = Int.random(in: 0..<words.count)
   @State private var nextButtonHidden = true
   
   private var revealedWord: String {
     var var2 = ""
-    for l in words[guessWordIndex] {
+    for l in Self.words[guessWordIndex] {
       var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
     }
     var2.removeLast()
@@ -50,7 +50,7 @@ struct ContentView: View {
           Spacer()
           VStack(alignment: .trailing) {
             Text("Words to guess: \(toGuess)")
-            Text("Words in game: \(words.count)")
+            Text("Words in game: \(Self.words.count)")
           }
         }
         .font(.subheadline)
@@ -101,7 +101,6 @@ struct ContentView: View {
               }
             
             Button("Guess!") {
-              //TODO: Check the letter in the word
               updateValues()
               updateView()
             }
@@ -115,7 +114,14 @@ struct ContentView: View {
         } else {
           Button("New Word?") {
             //TODO: New game with a new word
-            
+            withAnimation {
+              availableGuesses = Self.maxGuesses
+              gameTitle = Self.startTitle
+              guessWordIndex = nonRepeatingRandom(oldVal: guessWordIndex)
+              lettersGuessed = ""
+              imageName = "flower8"
+              nextButtonHidden = true
+            }
           }
           .fontWeight(.medium)
           .buttonStyle(.borderedProminent)
@@ -129,7 +135,6 @@ struct ContentView: View {
           .resizable()
           .scaledToFit()
           .frame(height: geo.size.height * 0.7)
-        
       }
       .ignoresSafeArea(edges: .bottom)
     }
@@ -139,10 +144,10 @@ struct ContentView: View {
     if !lettersGuessed.contains(letter) {
       withAnimation {
         lettersGuessed += letter
-        if !words[guessWordIndex].contains(letter) {
+        if !Self.words[guessWordIndex].contains(letter) {
           availableGuesses -= 1
           imageName = "wilt\(availableGuesses)"
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.75){
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.4){
             imageName = "flower\(availableGuesses)"
           }
         } else {
@@ -154,13 +159,15 @@ struct ContentView: View {
   }
   
   func updateView() {
-    let win = correctGuesses == words[guessWordIndex].count
+    let win = correctGuesses == Self.words[guessWordIndex].count
     let plural = lettersGuessed.count == 1 ? "" : "es"
     
     if win {
       gameTitle = "You Guessed It! It Took You \(lettersGuessed.count) Guess\(plural) to Guess the Word!"
+      guessedWords += 1
     } else if availableGuesses == 0 {
       gameTitle = noGuessTitle
+      missedWords += 1
     } else {
       gameTitle = "You have made \(lettersGuessed.count) Guess\(plural)"
     }
@@ -168,8 +175,15 @@ struct ContentView: View {
     if availableGuesses == 0 || win {
       nextButtonHidden = false
     }
-    
     letter = ""
+  }
+  
+  func nonRepeatingRandom(oldVal: Int) -> Int {
+    var random: Int
+    repeat {
+      random = Int.random(in: 0..<Self.words.count)
+    } while (random == oldVal)
+    return random
   }
 }
 
