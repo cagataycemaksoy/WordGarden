@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
   private static let startTitle = "How Many Guesses to Uncover the Hidden Word?"
-  private static let noGuessTitle = "So Sorry, You're All Out Of Guesses."
   private static let maxGuesses = 8
+  private let noGuessTitle = "So Sorry, You're All Out Of Guesses."
   private let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE"]
   
   @State private var availableGuesses = maxGuesses
@@ -20,11 +20,12 @@ struct ContentView: View {
     words.count - guessedWords - missedWords
   }
   
-  @State private var gameTitle = startTitle
   @State private var letter = ""
+  @State private var lettersGuessed = ""
+  @State private var imageName = "flower8"
+  @State private var gameTitle = startTitle
   @State private var correctGuesses = 0
   @State private var guessWordIndex = 0
-  @State private var lettersGuessed = ""
   @State private var nextButtonHidden = true
   
   private var revealedWord: String {
@@ -34,9 +35,6 @@ struct ContentView: View {
     }
     var2.removeLast()
     return var2
-  }
-  private var imageName: String {
-    "flower\(availableGuesses)"
   }
   
   @FocusState private var focusedKeyboard: Bool
@@ -95,22 +93,23 @@ struct ContentView: View {
               }
               .focused($focusedKeyboard)
               .onSubmit {
-                guard !letter.isEmpty else {
+                guard !letter.isEmpty && availableGuesses > 0 else {
                   return
                 }
-                pressGuess()
+                updateValues()
+                updateView()
               }
             
             Button("Guess!") {
               //TODO: Check the letter in the word
-              pressGuess()
-              
+              updateValues()
+              updateView()
             }
             .fontWeight(.medium)
             .buttonStyle(.bordered)
             .tint(.appColor1.opacity(0.9))
             .foregroundStyle(.orange)
-            .disabled(letter.isEmpty)
+            .disabled(letter.isEmpty || availableGuesses == 0)
           }
           .padding(.bottom)
         } else {
@@ -136,33 +135,41 @@ struct ContentView: View {
     }
   }
   
-  func pressGuess() {
-    withAnimation {
-      if !lettersGuessed.contains(letter) {
+  func updateValues() {
+    if !lettersGuessed.contains(letter) {
+      withAnimation {
         lettersGuessed += letter
         if !words[guessWordIndex].contains(letter) {
           availableGuesses -= 1
+          imageName = "wilt\(availableGuesses)"
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.75){
+            imageName = "flower\(availableGuesses)"
+          }
         } else {
           correctGuesses += 1
         }
       }
-      
-      let guessesMade = Self.maxGuesses - availableGuesses
-      let win = correctGuesses == words[guessWordIndex].count
-      let plural = guessesMade == 1 ? "" : "es"
-      
-      if win {
-        gameTitle = "You Guessed It! It Took You \(guessesMade) Guess\(plural) to Guess the Word!"
-      } else {
-        gameTitle = (availableGuesses != 0 ?  "You have made \(guessesMade) Guess\(plural)" : Self.noGuessTitle)
-      }
-      
-      if availableGuesses == 0 || win {
-        nextButtonHidden = false
-      }
     }
-    letter = ""
     focusedKeyboard = false
+  }
+  
+  func updateView() {
+    let win = correctGuesses == words[guessWordIndex].count
+    let plural = lettersGuessed.count == 1 ? "" : "es"
+    
+    if win {
+      gameTitle = "You Guessed It! It Took You \(lettersGuessed.count) Guess\(plural) to Guess the Word!"
+    } else if availableGuesses == 0 {
+      gameTitle = noGuessTitle
+    } else {
+      gameTitle = "You have made \(lettersGuessed.count) Guess\(plural)"
+    }
+    
+    if availableGuesses == 0 || win {
+      nextButtonHidden = false
+    }
+    
+    letter = ""
   }
 }
 
