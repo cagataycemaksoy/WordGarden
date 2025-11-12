@@ -22,8 +22,11 @@ struct ContentView: View {
   
   @State private var gameTitle = startTitle
   @State private var letter = ""
+  @State private var correctGuesses = 0
   @State private var guessWordIndex = 0
   @State private var lettersGuessed = ""
+  @State private var nextButtonHidden = true
+  
   private var revealedWord: String {
     var var2 = ""
     for l in words[guessWordIndex] {
@@ -36,7 +39,6 @@ struct ContentView: View {
     "flower\(availableGuesses)"
   }
   
-  @State private var nextButtonHidden = true
   @FocusState private var focusedKeyboard: Bool
   
   var body: some View {
@@ -65,7 +67,9 @@ struct ContentView: View {
         Text(gameTitle)
           .font(.title2)
           .fontWeight(.medium)
+          .minimumScaleFactor(0.5)
           .multilineTextAlignment(.center)
+          .padding(.horizontal)
         
         Text(revealedWord)
           .font(.title3)
@@ -138,19 +142,27 @@ struct ContentView: View {
         lettersGuessed += letter
         if !words[guessWordIndex].contains(letter) {
           availableGuesses -= 1
+        } else {
+          correctGuesses += 1
         }
       }
       
       let guessesMade = Self.maxGuesses - availableGuesses
-      gameTitle = (availableGuesses != 0 ?  "You have made \(guessesMade) Guess\(guessesMade == 1 ? "" : "es")" : Self.noGuessTitle)
+      let win = correctGuesses == words[guessWordIndex].count
+      let plural = guessesMade == 1 ? "" : "es"
       
-      if availableGuesses == 0 {
+      if win {
+        gameTitle = "You Guessed It! It Took You \(guessesMade) Guess\(plural) to Guess the Word!"
+      } else {
+        gameTitle = (availableGuesses != 0 ?  "You have made \(guessesMade) Guess\(plural)" : Self.noGuessTitle)
+      }
+      
+      if availableGuesses == 0 || win {
         nextButtonHidden = false
       }
     }
     letter = ""
     focusedKeyboard = false
-    
   }
 }
 
