@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFAudio
 
 struct ContentView: View {
   private static let startTitle = "How Many Guesses to Uncover the Hidden Word?"
@@ -27,6 +28,7 @@ struct ContentView: View {
   @State private var correctGuesses = 0
   @State private var guessWordIndex = Int.random(in: 0..<words.count)
   @State private var nextButtonHidden = true
+  @State private var audioPlayer: AVAudioPlayer!
   
   private var revealedWord: String {
     var var2 = ""
@@ -122,6 +124,7 @@ struct ContentView: View {
               imageName = "flower8"
               nextButtonHidden = true
             }
+            correctGuesses = 0
           }
           .fontWeight(.medium)
           .buttonStyle(.borderedProminent)
@@ -150,8 +153,10 @@ struct ContentView: View {
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.4){
             imageName = "flower\(availableGuesses)"
           }
+          playAudio(for: "incorrect")
         } else {
           correctGuesses += 1
+          playAudio(for: "correct")
         }
       }
     }
@@ -165,9 +170,11 @@ struct ContentView: View {
     if win {
       gameTitle = "You Guessed It! It Took You \(lettersGuessed.count) Guess\(plural) to Guess the Word!"
       guessedWords += 1
+      playAudio(for: "word-guessed")
     } else if availableGuesses == 0 {
       gameTitle = noGuessTitle
       missedWords += 1
+      playAudio(for: "word-not-guessed")
     } else {
       gameTitle = "You have made \(lettersGuessed.count) Guess\(plural)"
     }
@@ -184,6 +191,22 @@ struct ContentView: View {
       random = Int.random(in: 0..<Self.words.count)
     } while (random == oldVal)
     return random
+  }
+  
+  func playAudio(for file: String) {
+    if audioPlayer != nil && audioPlayer.isPlaying {
+      audioPlayer.stop()
+    }
+    guard let audioData = NSDataAsset(name: file) else {
+      fatalError("Failed to find the file.")
+    }
+    
+    do {
+      audioPlayer = try AVAudioPlayer(data: audioData.data)
+      audioPlayer.play()
+    } catch {
+      fatalError("Failed to create audio player.")
+    }
   }
 }
 
