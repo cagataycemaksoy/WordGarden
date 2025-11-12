@@ -8,29 +8,36 @@
 import SwiftUI
 
 struct ContentView: View {
+  private static let startTitle = "How Many Guesses to Uncover the Hidden Word?"
+  private static let noGuessTitle = "So Sorry, You're All Out Of Guesses."
+  private static let maxGuesses = 8
+  private let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE"]
+  
+  @State private var availableGuesses = maxGuesses
   @State private var guessedWords = 0
   @State private var missedWords = 0
   private var toGuess: Int {
     words.count - guessedWords - missedWords
   }
   
+  @State private var gameTitle = startTitle
   @State private var letter = ""
-  @State private var wordToGuess = 0
+  @State private var guessWordIndex = 0
   @State private var lettersGuessed = ""
   private var revealedWord: String {
     var var2 = ""
-    for l in words[wordToGuess] {
+    for l in words[guessWordIndex] {
       var2 += lettersGuessed.contains(l) ? "\(l) " : "_ "
     }
     var2.removeLast()
     return var2
   }
+  private var imageName: String {
+    "flower\(availableGuesses)"
+  }
   
-  @State private var imageName = "flower8"
   @State private var nextButtonHidden = true
   @FocusState private var focusedKeyboard: Bool
-  
-  private let words = ["CAT", "COFFEE", "HAT", "OMNISCIENCE"]
   
   var body: some View {
     GeometryReader { geo in
@@ -55,7 +62,7 @@ struct ContentView: View {
           .frame(height: 0.6)
           .padding(.horizontal)
         
-        Text("How Many Guesses to Uncover the Hidden Word?")
+        Text(gameTitle)
           .font(.title2)
           .fontWeight(.medium)
           .multilineTextAlignment(.center)
@@ -93,6 +100,7 @@ struct ContentView: View {
             Button("Guess!") {
               //TODO: Check the letter in the word
               pressGuess()
+              
             }
             .fontWeight(.medium)
             .buttonStyle(.bordered)
@@ -125,13 +133,24 @@ struct ContentView: View {
   }
   
   func pressGuess() {
-    if !lettersGuessed.contains(letter) {
-      withAnimation {
+    withAnimation {
+      if !lettersGuessed.contains(letter) {
         lettersGuessed += letter
+        if !words[guessWordIndex].contains(letter) {
+          availableGuesses -= 1
+        }
+      }
+      
+      let guessesMade = Self.maxGuesses - availableGuesses
+      gameTitle = (availableGuesses != 0 ?  "You have made \(guessesMade) Guess\(guessesMade == 1 ? "" : "es")" : Self.noGuessTitle)
+      
+      if availableGuesses == 0 {
+        nextButtonHidden = false
       }
     }
     letter = ""
     focusedKeyboard = false
+    
   }
 }
 
